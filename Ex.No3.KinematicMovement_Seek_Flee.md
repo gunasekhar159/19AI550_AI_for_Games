@@ -17,6 +17,7 @@ To write a python program to simulate the process of seek and flee behaviors usi
 11. Stop the program
     
 ### Program:
+```
 import pygame
 import math
 import sys
@@ -100,7 +101,7 @@ def main():
 # Entry point
 if __name__ == "__main__":  # Fixed __name__ and __main__
     main()
-
+```
 
 
 
