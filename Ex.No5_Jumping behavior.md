@@ -111,5 +111,4 @@ Thus the simple jumping behavior was implemented.
 
 
 
-### Result:
-Thus the simple jumping behavior  was implemented.
+
