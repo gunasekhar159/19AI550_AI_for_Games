@@ -59,7 +59,8 @@ if __name__ == "__main__":
     print("Optimal value:", alpha_beta_pruning(0, 0, True, values, -INF, INF))
 ```
 ### Output:
-![Output](https://github.com/naramala-niharika/19AI550_AI_for_Games/blob/main/Screenshot%202024-10-14%20232653.png?raw=true)
+<img width="637" alt="image" src="https://github.com/user-attachments/assets/2351ac40-5198-4238-aa09-efaff2a422aa">
+
 
 
 
