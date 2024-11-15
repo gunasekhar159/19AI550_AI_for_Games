@@ -1,205 +1,212 @@
 # Ex.No: 11  Mini Project 
-### DATE:                                                                            
+                          
+### Slot: 4B3-1
+### Name: Gunasekhar M
 ### REGISTER NUMBER : 212221240014
-### AIM: To implement the Pong game in Python using the turtle
+
+### AIM: 
+
+To write a python program to simulate the game using YOLO Algorithm.
 
 ### Algorithm:
-~~~
-1. Initialize game window, paddles, ball, and score display.
-2. Define flag-based movement functions for paddles:
-    - On key press, set movement flag to True.
-    - On key release, set movement flag to False.
-3. Define `move_paddles()` to check movement flags periodically, updating paddle positions if needed.
-4. Main game loop:
-    a. Update ball position.
-    b. Check for top/bottom boundary collisions and reverse vertical direction if necessary.
-    c. Check for left/right boundary collisions:
-        - Reset ball to center, reverse direction, update score.
-        - Display updated score.
-    d. Check for paddle collisions:
-        - If ball is within paddle range, reverse horizontal direction.
-5. Repeat loop continuously for game dynamics.
+1.Initialize Pygame and set up screen dimensions, colors, and constants.
 
-~~~
+2. Load spaceship and alien images and scale them to appropriate sizes.
+
+3. Define the Bullet class for handling bullet movement and properties.
+
+4. Define the zombie class for handling alien movement and properties.
+
+5. Initialize main game loop:
+
+    -> Process user input for player movement (left, right) and firing bullets (spacebar).
+
+    -> Move bullets upwards and remove them if they go off-screen.
+
+    -> Move aliens downwards and remove those that go off-screen.
+
+    -> Spawn new aliens at random intervals.
+
+7. Check for collisions between bullets and aliens, updating the score and removing the alien and bullet upon collision.
+
+8. Check for collisions between the player's shooter and zombies, ending the game if a collision occurs.
+
+9. Draw all game elements to the screen.
+
+10. Display the game-over screen with score and options to restart or quit.
+
+11. Restart the game or quit based on user input from the game-over screen.
+
 ### Program:
-~~~
-import turtle as t
-import os
+```python
 
-# Player scores
-playerAscore = 0
-playerBscore = 0
+import pygame
+import random
+import time
 
-# Paddle movement flags
-left_paddle_up = False
-left_paddle_down = False
-right_paddle_up = False
-right_paddle_down = False
+# Initialize Pygame
+pygame.init()
 
-# Create a window
-window = t.Screen()
-window.title("The Pong Game")
-window.bgcolor("black")  # Background color changed to black
-window.setup(width=800, height=600)
-window.tracer(0)
+# Constants
+WIDTH, HEIGHT = 800, 600
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+PLAYER_IMG_SIZE = 50  # Size of the player spaceship image
+ALIEN_IMG_SIZE = 40   # Size of the alien image
+BULLET_SPEED = 10     # Speed of bullets (moving right)
+PLAYER_SPEED = 5
 
-# Left paddle
-leftpaddle = t.Turtle()
-leftpaddle.speed(0)
-leftpaddle.shape("square")
-leftpaddle.color("white")
-leftpaddle.shapesize(stretch_wid=5, stretch_len=1)
-leftpaddle.penup()
-leftpaddle.goto(-350, 0)
+# Set up the display
+win = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Space Shooter")
 
-# Right paddle
-rightpaddle = t.Turtle()
-rightpaddle.speed(0)
-rightpaddle.shape("square")
-rightpaddle.color("white")
-rightpaddle.shapesize(stretch_wid=5, stretch_len=1)
-rightpaddle.penup()
-rightpaddle.goto(350, 0)
+# Load images (add your spaceship and alien images here)
+player_img = pygame.image.load('manshooter.png')  # Add your spaceship image path here
+player_img = pygame.transform.scale(player_img, (PLAYER_IMG_SIZE, PLAYER_IMG_SIZE))
 
-# Ball
-ball = t.Turtle()
-ball.speed(1)
-ball.shape("circle")
-ball.color("red")
-ball.penup()
-ball.goto(5, 5)
-ballxdirection = 0.2
-ballydirection = 0.2
+alien_img = pygame.image.load('alienplant.png')  # Add your alien image path here
+alien_img = pygame.transform.scale(alien_img, (ALIEN_IMG_SIZE, ALIEN_IMG_SIZE))
 
-# Pen for scorecard update
-pen = t.Turtle()
-pen.speed(0)
-pen.color("blue")
-pen.penup()
-pen.hideturtle()
-pen.goto(0, 260)
-pen.write("Player A: 0   Player B: 0", align="center", font=('Arial', 24, 'normal'))
+# Bullet class
+class Bullet:
+    def __init__(self, x, y):
+        self.rect = pygame.Rect(x, y, 10, 5)  # Set a wider bullet for horizontal shooting
 
-# Paddle movement functions
-def move_paddles():
-    if left_paddle_up:
-        leftpaddle.sety(leftpaddle.ycor() + 20)
-    if left_paddle_down:
-        leftpaddle.sety(leftpaddle.ycor() - 20)
-    if right_paddle_up:
-        rightpaddle.sety(rightpaddle.ycor() + 20)
-    if right_paddle_down:
-        rightpaddle.sety(rightpaddle.ycor() - 20)
+    def move(self):
+        self.rect.x += BULLET_SPEED  # Move the bullet to the right
 
-    # Schedule the next paddle move check
-    window.ontimer(move_paddles, 20)
+# Alien class
+class Alien:
+    def __init__(self, x, y):
+        self.rect = pygame.Rect(x, y, ALIEN_IMG_SIZE, ALIEN_IMG_SIZE)
 
-# Key press handlers
-def leftpaddleup_press():
-    global left_paddle_up
-    left_paddle_up = True
+    def move(self):
+        self.rect.x -= 3  # Move the alien to the left
 
-def leftpaddleup_release():
-    global left_paddle_up
-    left_paddle_up = False
+# Main Game Loop
+def main():
+    clock = pygame.time.Clock()
+    player_pos = [50, HEIGHT // 2 - PLAYER_IMG_SIZE // 2]  # Position player in top-left corner
+    bullets, aliens = [], []
+    score = 0
+    run_game = True
 
-def leftpaddledown_press():
-    global left_paddle_down
-    left_paddle_down = True
+    start_time = time.time()  # Record start time
 
-def leftpaddledown_release():
-    global left_paddle_down
-    left_paddle_down = False
+    # Define the font for displaying text
+    font = pygame.font.SysFont(None, 36)
 
-def rightpaddleup_press():
-    global right_paddle_up
-    right_paddle_up = True
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
 
-def rightpaddleup_release():
-    global right_paddle_up
-    right_paddle_up = False
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_UP] and player_pos[1] > 0:
+            player_pos[1] -= PLAYER_SPEED
+        if keys[pygame.K_DOWN] and player_pos[1] < HEIGHT - PLAYER_IMG_SIZE:
+            player_pos[1] += PLAYER_SPEED
+        if keys[pygame.K_SPACE]:  # If the space bar is pressed
+            bullets.append(Bullet(player_pos[0] + PLAYER_IMG_SIZE // 2, player_pos[1] + PLAYER_IMG_SIZE // 2))
 
-def rightpaddledown_press():
-    global right_paddle_down
-    right_paddle_down = True
+        # Move bullets
+        for bullet in bullets:
+            bullet.move()  # Call the move method for each bullet
+            if bullet.rect.x > WIDTH:  # Remove bullets that move off-screen (right side)
+                bullets.remove(bullet)
 
-def rightpaddledown_release():
-    global right_paddle_down
-    right_paddle_down = False
+        # Move aliens
+        new_aliens = []
+        for alien in aliens:
+            alien.move()
+            if alien.rect.x > 0:  # Keep aliens on the screen until they go off the left side
+                new_aliens.append(alien)
 
-# Assign keys to control paddles with press and release events
-window.listen()
-window.onkeypress(leftpaddleup_press, 'w')
-window.onkeyrelease(leftpaddleup_release, 'w')
-window.onkeypress(leftpaddledown_press, 's')
-window.onkeyrelease(leftpaddledown_release, 's')
-window.onkeypress(rightpaddleup_press, 'Up')
-window.onkeyrelease(rightpaddleup_release, 'Up')
-window.onkeypress(rightpaddledown_press, 'Down')
-window.onkeyrelease(rightpaddledown_release, 'Down')
+        # Spawn new aliens randomly on the right side of the screen
+        if random.random() < 0.02:  # Adjust spawn rate
+            new_aliens.append(Alien(WIDTH, random.randint(0, HEIGHT - ALIEN_IMG_SIZE)))
 
-# Start continuous paddle movement
-move_paddles()
+        # Check collisions
+        for bullet in bullets:
+            for alien in new_aliens:
+                if bullet.rect.colliderect(alien.rect):
+                    bullets.remove(bullet)
+                    new_aliens.remove(alien)
+                    score += 10  # Increase score for hitting an alien
+                    break
 
-# Game loop
-while True:
-    window.update()
+        # Check spaceship-alien collisions
+        for alien in new_aliens:
+            if alien.rect.colliderect(pygame.Rect(player_pos[0], player_pos[1], PLAYER_IMG_SIZE, PLAYER_IMG_SIZE)):
+                run_game = False  # Set flag to stop the game
 
-    # Moving the ball
-    ball.setx(ball.xcor() + ballxdirection)
-    ball.sety(ball.ycor() + ballydirection)
+        aliens = new_aliens
 
-    # Border collision
-    if ball.ycor() > 290:
-        ball.sety(290)
-        ballydirection *= -1
-    if ball.ycor() < -290:
-        ball.sety(-290)
-        ballydirection *= -1
+        # Draw everything
+        win.fill(BLACK)
+        win.blit(player_img, (player_pos[0], player_pos[1]))
 
-    # Right wall collision
-    if ball.xcor() > 390:
-        ball.goto(0, 0)
-        ballxdirection *= -1
-        playerAscore += 1
-        pen.clear()
-        pen.write("Player A: {}   Player B: {}".format(playerAscore, playerBscore), align="center", font=('Arial', 24, 'normal'))
-        os.system("afplay wallhit.wav&")
+        for alien in aliens:
+            win.blit(alien_img, (alien.rect.x, alien.rect.y))
 
-    # Left wall collision
-    if ball.xcor() < -390:
-        ball.goto(0, 0)
-        ballxdirection *= -1
-        playerBscore += 1
-        pen.clear()
-        pen.write("Player A: {}   Player B: {}".format(playerAscore, playerBscore), align="center", font=('Arial', 24, 'normal'))
-        os.system("afplay wallhit.wav&")
+        for bullet in bullets:
+            pygame.draw.rect(win, WHITE, bullet.rect)
 
-    # Paddle collision
-    if (340 < ball.xcor() < 350) and (rightpaddle.ycor() - 40 < ball.ycor() < rightpaddle.ycor() + 40):
-        ball.setx(340)
-        ballxdirection *= -1
-        os.system("afplay paddle.wav&")
+        # Display score
+        score_text = font.render(f"Score: {score}", True, WHITE)
+        win.blit(score_text, (10, 10))
 
-    if (-350 < ball.xcor() < -340) and (leftpaddle.ycor() - 40 < ball.ycor() < leftpaddle.ycor() + 40):
-        ball.setx(-340)
-        ballxdirection *= -1
-        os.system("afplay paddle.wav&")
+        # Display elapsed time
+        elapsed_time = time.time() - start_time  # Calculate elapsed time
+        time_text = font.render(f"Time: {elapsed_time:.2f} seconds", True, WHITE)
+        win.blit(time_text, (10, 40))
 
+        pygame.display.update()
+        clock.tick(30)
 
+        # If the game is over, show the game-over screen
+        if not run_game:
+            game_over_screen(score)
 
-~~~
+# Function to display the game over screen
+def game_over_screen(score):
+    font = pygame.font.SysFont(None, 48)
+    while True:
+        win.fill(BLACK)
+        game_over_text = font.render("Game Over", True, WHITE)
+        score_text = font.render(f"Score: {score}", True, WHITE)
+        restart_text = font.render("Press R to Restart or Q to Quit", True, WHITE)
 
+        win.blit(game_over_text, (WIDTH // 2 - game_over_text.get_width() // 2, HEIGHT // 2 - 60))
+        win.blit(score_text, (WIDTH // 2 - score_text.get_width() // 2, HEIGHT // 2))
+        win.blit(restart_text, (WIDTH // 2 - restart_text.get_width() // 2, HEIGHT // 2 + 40))
 
+        pygame.display.update()
 
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:  # Restart the game
+                    main()  # Call main again to restart
+                if event.key == pygame.K_q:  # Quit the game
+                    pygame.quit()
+                    return
 
+if __name__ == "__main__":
+    main()
 
-
-
+```
 ### Output:
 
-![pong game ](https://github.com/user-attachments/assets/6c7b88c8-b9ac-463d-a972-bf80086931c8)
+
+![Screenshot 2024-11-15 103808](https://github.com/user-attachments/assets/df46b1f2-6480-4e18-9704-7e18afa3db13)
+
+
+![Screenshot 2024-11-15 103816](https://github.com/user-attachments/assets/d397ed66-9f1c-4625-b838-5952babbe7ba)
 
 
 ### Result:
-Thus the simple game was implemented 
+Thus the simple  game was implemented using Yolo Successfully.
